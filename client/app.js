@@ -4,6 +4,9 @@ const messagesList= document.querySelector('#messages-list');
 const addMessageForm = document.querySelector('#add-messages-form');
 const userNameInput = document.querySelector('#username');
 const messageContentInput = document.querySelector('#message-content');
+const socket = io();
+
+socket.on('message', ({ author, content }) => addMessage(author, content))
 
 
 let userName ='';
@@ -20,18 +23,21 @@ const login = (e) => {
 }
 };
 
-console.log('length', messageContentInput.value.length)
-const sendMessage = (e) => {
+function sendMessage(e) {
   e.preventDefault();
-  if (messageContentInput.value.length > 0) {
-   
-    addMessage(userName, messageContentInput.value);
-    messageContentInput.value = "";
-} else {
-    alert('Please enter a message');
-}
-}
 
+  let messageContent = messageContentInput.value;
+
+  if(!messageContent.length) {
+    alert('You have to type something!');
+  }
+  else {
+    addMessage(userName, messageContent);
+    socket.emit('message', { author: userName, content: messageContent })
+    messageContentInput.value = '';
+  }
+
+}
 
 function addMessage(author, content) {
   const message = document.createElement('li');
