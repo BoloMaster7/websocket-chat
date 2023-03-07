@@ -1,12 +1,13 @@
+const socket = io();
+
+socket.on('message', ({ author, content }) => addMessage(author, content))
+
 const loginForm = document.querySelector('#welcome-form');
 const messagesSection = document.querySelector('#messages-section');
 const messagesList= document.querySelector('#messages-list');
 const addMessageForm = document.querySelector('#add-messages-form');
 const userNameInput = document.querySelector('#username');
 const messageContentInput = document.querySelector('#message-content');
-const socket = io();
-
-socket.on('message', ({ author, content }) => addMessage(author, content))
 
 
 let userName ='';
@@ -34,6 +35,7 @@ function sendMessage(e) {
   else {
     addMessage(userName, messageContent);
     socket.emit('message', { author: userName, content: messageContent })
+    socket.emit('message', { author: 'John Doe', content: 'Lorem Ipsum' });
     messageContentInput.value = '';
   }
 
