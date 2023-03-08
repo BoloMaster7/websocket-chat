@@ -10,6 +10,7 @@ const io = socket(server);
 
 
 const messages = [];
+const users = [];
 
 app.use(express.static(path.join(__dirname, '/client/')));
 
@@ -20,9 +21,29 @@ app.get('*', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('New client! Its id – ' + socket.id);
+
+  socket.on('join', (userName) => {
+    users.push({ id: socket.id, name: userName });
+    socket.broadcast.emit('message', {
+      author: 'chatbot',
+      content: `<i>${userName} has joined the conversation!`,
+    });
+  });
+
   socket.on('message', (message) => {
     console.log('Oh, I\'ve got something from ' + socket.id);
     messages.push(message);
     socket.broadcast.emit('message', message);
+  });
+
+  socket.on('disconnect', () => {
+    if (users.length > 0) {
+      const user = users.find((user) => user.id === socket.id);
+      users.splice(users.indexOf(user), 1);
+      socket.broadcast.emit('message', {
+        author: 'chatbot',
+        content: `<i>${user.name} has left the conversation... :(`,
+      });
+    }
   });
 });
